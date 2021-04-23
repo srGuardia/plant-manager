@@ -65,8 +65,6 @@ export const ListPlantsContainer = (props: any) => {
 
     if (!data) return setLoading(true);
 
-    console.log('page', page);
-
     if (page > 1) {
       setPlants((oldValues) => [...oldValues, ...data]);
       setfilteredPlants((oldValues) => [...oldValues, ...data]);
