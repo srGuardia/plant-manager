@@ -1,9 +1,18 @@
-import React from 'react';
+import { useNavigation } from '@react-navigation/core';
+import React, { useCallback } from 'react';
 import { SafeAreaView, Text, View } from 'react-native';
 import { ButtonComponent } from '../../../components/Button';
 import { styles } from './styles';
 
 export const UserConfirmationContainer = (props: any) => {
+  const navigation = useNavigation();
+
+  const handleListPlants = useCallback(() => {
+    navigation.navigate('ListPlants', {
+      userName: props.route.params.userName,
+    });
+  }, [props.route.params.userName]);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -20,7 +29,7 @@ export const UserConfirmationContainer = (props: any) => {
         </Text>
 
         <View style={styles.footer}>
-          <ButtonComponent title='Começar' />
+          <ButtonComponent title='Começar' onPress={handleListPlants} />
         </View>
       </View>
     </SafeAreaView>
