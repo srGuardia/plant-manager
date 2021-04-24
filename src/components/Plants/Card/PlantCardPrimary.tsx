@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
-import { SvgUri } from 'react-native-svg';
+import { SvgFromUri } from 'react-native-svg';
 import { RectButton, RectButtonProps } from 'react-native-gesture-handler';
 
 import colors from '../../../../styles/colors';
@@ -19,7 +19,7 @@ export const PlantCardPrimaryComponent = ({
   ...rest
 }: PlantCardPrimaryProps) => (
   <RectButton style={styles.container} {...rest}>
-    <SvgUri uri={photo} height={100} width={100} />
+    <SvgFromUri uri={photo} height={100} width={100} />
     <Text style={styles.textName}>{name}</Text>
   </RectButton>
 );

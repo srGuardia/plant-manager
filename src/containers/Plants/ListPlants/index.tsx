@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -14,33 +15,35 @@ import { HeaderComponent } from '../../../components/Header';
 import { LoadingComponent } from '../../../components/Loading';
 import { PlantCardPrimaryComponent } from '../../../components/Plants/Card/PlantCardPrimary';
 import { api } from '../../../services/api';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/core';
+import { PlantProps } from '../../../utils/storage';
 interface EnvironmentsProps {
   key: string;
   title: string;
 }
 
-interface PlantsProps {
-  id: number;
-  name: string;
-  about: string;
-  water_tips: string;
-  photo: string;
-  environments: [string];
-  frequency: {
-    times: number;
-    repeat_every: string;
-  };
-}
-
-export const ListPlantsContainer = (props: any) => {
+export const ListPlantsContainer = () => {
   const [environments, setEnvironments] = useState<EnvironmentsProps[]>([]);
-  const [plants, setPlants] = useState<PlantsProps[]>([]);
-  const [filteredPlants, setfilteredPlants] = useState<PlantsProps[]>([]);
+  const [plants, setPlants] = useState<PlantProps[]>([]);
+  const [filteredPlants, setfilteredPlants] = useState<PlantProps[]>([]);
   const [evironmentsSelected, setEvironmentsSelected] = useState('all');
   const [loading, setLoading] = useState(true);
   let [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [userName, setUserName] = useState<string>();
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    async function getUserName() {
+      const user = await AsyncStorage.getItem('@plantmanager:user');
+
+      if (user) setUserName(JSON.parse(user));
+    }
+
+    getUserName();
+  }, []);
 
   const handleSelectEnvironment = useCallback(
     (value: string) => {
@@ -57,6 +60,10 @@ export const ListPlantsContainer = (props: any) => {
     },
     [plants]
   );
+
+  const handleSavePlants = useCallback((plant: PlantProps) => {
+    navigation.navigate('SavePlants', { plant });
+  }, []);
 
   async function getPlants() {
     const { data } = await api.get(
@@ -109,7 +116,7 @@ export const ListPlantsContainer = (props: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <HeaderComponent title='Olá,' subTitle={props.route.params.userName} />
+        <HeaderComponent title='Olá,' subTitle={userName} />
 
         <Text style={styles.title}>Em qual ambiente</Text>
         <Text style={styles.subTitle}>você quer colocar sua planta?</Text>
@@ -118,6 +125,7 @@ export const ListPlantsContainer = (props: any) => {
       <View style={styles.listEnvironments}>
         <FlatList
           data={environments}
+          keyExtractor={(item) => String(item.key)}
           renderItem={({ item }) => (
             <EnvironmentButtonComponents
               key={item.key}
@@ -134,7 +142,13 @@ export const ListPlantsContainer = (props: any) => {
       <View style={styles.listPlants}>
         <FlatList
           data={filteredPlants}
-          renderItem={({ item }) => <PlantCardPrimaryComponent data={item} />}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <PlantCardPrimaryComponent
+              data={item}
+              onPress={() => handleSavePlants(item)}
+            />
+          )}
           showsVerticalScrollIndicator={false}
           numColumns={2}
           onEndReachedThreshold={0.1}
@@ -152,6 +166,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingVertical: Platform.OS === 'android' ? 30 : 0,
   },
   header: {
     paddingHorizontal: 30,

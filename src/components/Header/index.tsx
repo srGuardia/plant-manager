@@ -7,7 +7,7 @@ import avatarImg from '../../assets/avatar.jpeg';
 
 interface HeaderProps {
   title: string;
-  subTitle: string;
+  subTitle?: string;
 }
 
 export const HeaderComponent = ({ title, subTitle }: HeaderProps) => (

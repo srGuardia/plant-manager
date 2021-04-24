@@ -13,6 +13,7 @@ import {
 import colors from '../../../../styles/colors';
 import { ButtonComponent } from '../../../components/Button';
 import { identificationStyles } from './styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const UserIdentificationContainer = () => {
   const [isFocused, setIsFocused] = useState(false);
@@ -21,11 +22,21 @@ export const UserIdentificationContainer = () => {
 
   const navigation = useNavigation();
 
-  const handleSubmit = useCallback(() => {
-    if (!name) {
-      alert('Insira o seu nome');
-    } else {
-      navigation.navigate('Confirmation', { userName: name });
+  const handleSubmit = useCallback(async () => {
+    if (!name) return alert('Insira o seu nome');
+
+    try {
+      await AsyncStorage.setItem('@plantmanager:user', JSON.stringify(name));
+
+      navigation.navigate('Confirmation', {
+        title: 'Prontinho',
+        text: `Agora vamos começar a cuidar das suas ${'\n'} plantinhas com muito cuidado.`,
+        nextScreen: 'ListPlants',
+        icon: 'smile',
+        buttonTitle: 'Começar',
+      });
+    } catch (error) {
+      return alert(error.message);
     }
   }, [name]);
 

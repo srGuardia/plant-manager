@@ -20,7 +20,6 @@ export const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     marginTop: 50,
   },
-  textName: { fontFamily: fonts.text },
   text: {
     color: colors.heading,
     fontSize: 17,
