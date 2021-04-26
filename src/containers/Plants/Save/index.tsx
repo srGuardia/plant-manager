@@ -68,52 +68,60 @@ export const SavePlantsContainer = (props: any) => {
     } catch (error) {
       return alert(error.message);
     }
-  }, []);
+  }, [selectedDateTime]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.contentPlant}>
-        <SvgFromUri uri={plant.photo} width={150} height={150} />
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.container}
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.contentPlant}>
+          <SvgFromUri uri={plant.photo} width={150} height={150} />
 
-        <Text style={styles.namePlant}>{plant.name}</Text>
-        <Text style={styles.infoPlant}>{plant.about}</Text>
-      </View>
-
-      <View style={styles.controller}>
-        <View style={styles.tipContainer}>
-          <Image source={waterImg} style={styles.tipImage} />
-          <Text style={styles.tipText}>{plant.water_tips}</Text>
+          <Text style={styles.namePlant}>{plant.name}</Text>
+          <Text style={styles.infoPlant}>{plant.about}</Text>
         </View>
 
-        <Text style={styles.alertLabel}>
-          Escolha o melhor horáriopara ser lembrado:
-        </Text>
+        <View style={styles.controller}>
+          <View style={styles.tipContainer}>
+            <Image source={waterImg} style={styles.tipImage} />
+            <Text style={styles.tipText}>{plant.water_tips}</Text>
+          </View>
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={selectedDateTime}
-            mode='time'
-            display='spinner'
-            onChange={handleChangeDate}
+          <Text style={styles.alertLabel}>
+            Escolha o melhor horáriopara ser lembrado:
+          </Text>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={selectedDateTime}
+              mode='time'
+              display='spinner'
+              onChange={handleChangeDate}
+            />
+          )}
+
+          {Platform.OS === 'android' && (
+            <TouchableOpacity
+              style={styles.datePickerButton}
+              onPress={handleDatePickAndroid}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.datePickerText}>{`Mudar ${format(
+                selectedDateTime,
+                'HH:mm'
+              )}`}</Text>
+            </TouchableOpacity>
+          )}
+
+          <ButtonComponent
+            title='Cadastrar Planta'
+            onPress={handleConfirmSave}
           />
-        )}
-
-        {Platform.OS === 'android' && (
-          <TouchableOpacity
-            style={styles.datePickerButton}
-            onPress={handleDatePickAndroid}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.datePickerText}>{`Mudar ${format(
-              selectedDateTime,
-              'HH:mm'
-            )}`}</Text>
-          </TouchableOpacity>
-        )}
-
-        <ButtonComponent title='Cadastrar Planta' onPress={handleConfirmSave} />
-      </View>
-    </SafeAreaView>
+        </View>
+      </SafeAreaView>
+    </ScrollView>
   );
 };
 

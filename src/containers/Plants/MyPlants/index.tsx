@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   SafeAreaView,
   View,
@@ -7,12 +7,18 @@ import {
   Image,
   Platform,
   FlatList,
+  Alert,
 } from 'react-native';
 import colors from '../../../../styles/colors';
 import { HeaderComponent } from '../../../components/Header';
 import waterImg from '../../../assets/waterdrop.png';
 import fonts from '../../../../styles/fonts';
-import { getPlants, PlantProps } from '../../../utils/storage';
+import {
+  getPlants,
+  PlantProps,
+  removePlant,
+  StorageStateProps,
+} from '../../../utils/storage';
 import { formatDistance } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { PlantCardSecundaryComponent } from '../../../components/Plants/Card/PlantCardSecundary';
@@ -27,21 +33,46 @@ export const MyPlantsContainer = () => {
     async function loadStoragePlants() {
       const plantStorage = await getPlants();
 
-      const nextTime = formatDistance(
-        new Date(plantStorage[0].dateTimeNotification).getTime(),
-        new Date().getTime(),
-        { locale: pt }
-      );
+      if (plantStorage.length === 0) {
+        return alert('Não há plantas cadastradas!');
+      } else {
+        const nextTime = formatDistance(
+          new Date(plantStorage[0].dateTimeNotification).getTime(),
+          new Date().getTime(),
+          { locale: pt }
+        );
 
-      setNextWatered(
-        `Não esqueça de regar a ${plantStorage[0].name} à ${nextTime}.`
-      );
+        setNextWatered(
+          `Não esqueça de regar a ${plantStorage[0].name} à ${nextTime}.`
+        );
 
-      setPlants(plantStorage);
-      setLoading(false);
+        setPlants(plantStorage);
+        setLoading(false);
+      }
     }
 
     loadStoragePlants();
+  }, []);
+
+  const handleRemove = useCallback((plant: PlantProps) => {
+    Alert.alert('Remover', `Deseja remover à ${plant.name} ?`, [
+      { text: 'Não 🙏', style: 'cancel' },
+      {
+        text: 'Sim 😢',
+        style: 'cancel',
+        onPress: async () => {
+          try {
+            await removePlant(plant.id);
+
+            setPlants((oldData) =>
+              oldData.filter((item) => item.id !== plant.id)
+            );
+          } catch (error) {
+            alert(error.message);
+          }
+        },
+      },
+    ]);
   }, []);
 
   if (loading) return <LoadingComponent />;
@@ -64,8 +95,11 @@ export const MyPlantsContainer = () => {
         <FlatList
           data={plants}
           keyExtractor={(plant) => String(plant.id)}
-          renderItem={(plant) => (
-            <PlantCardSecundaryComponent data={plant.item} />
+          renderItem={({ item }) => (
+            <PlantCardSecundaryComponent
+              data={item}
+              handleRemove={() => handleRemove(item)}
+            />
           )}
           showsVerticalScrollIndicator={false}
         />
